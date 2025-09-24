@@ -1,6 +1,3 @@
--- ===== Reprocesso D-3 até D0 para data_etl.tb_captacao =====
--- Execute como script no BigQuery Console ou via Composer.
-
 DECLARE run_date   DATE DEFAULT CURRENT_DATE();              
 DECLARE start_date DATE DEFAULT DATE_SUB(run_date, INTERVAL 3 DAY);
 
