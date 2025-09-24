@@ -1,0 +1,69 @@
+-- ===== Reprocesso D-3 até D0 para data_etl.tb_captacao =====
+-- Execute como script no BigQuery Console ou via Composer.
+
+DECLARE run_date   DATE DEFAULT CURRENT_DATE();              
+DECLARE start_date DATE DEFAULT DATE_SUB(run_date, INTERVAL 3 DAY);
+
+DELETE FROM `single-healer-473019-e6.data_etl.tb_captacao`
+WHERE inscricao_dt BETWEEN start_date AND run_date;
+
+
+INSERT INTO `single-healer-473019-e6.data_etl.tb_captacao` (
+  business_key, complete_name, name_clean, first_name, last_name,
+  email_normalized, email_is_valid,
+  phone_raw, phone_digits, phone_e164,
+  email_hash, phone_hash, cpf_hash,
+  brand_name, idmarca, dsmodalidade, periodocaptacao, uf, municipio,
+  inscricao_ts, inscricao_dt,
+  _ingestion_ts
+)
+WITH src AS (
+  SELECT
+
+    CAST(businesskey AS STRING) AS business_key,
+    TRIM(nome) AS complete_name,
+    INITCAP(LOWER(REGEXP_REPLACE(TRIM(nome), r'\s+', ' '))) AS name_clean,
+    REGEXP_EXTRACT(REGEXP_REPLACE(TRIM(nome), r'\s+', ' '), r'^\S+')  AS first_name,
+    REGEXP_EXTRACT(REGEXP_REPLACE(TRIM(nome), r'\s+', ' '), r'(\S+)$') AS last_name,
+    LOWER(TRIM(email)) AS email_normalized,
+    REGEXP_CONTAINS(
+      LOWER(TRIM(email)),
+      r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$'
+    ) AS email_is_valid,
+    TRIM(celular) AS phone_raw,
+    REGEXP_REPLACE(COALESCE(celular,''), r'\D', '') AS phone_digits,
+    CASE
+      WHEN REGEXP_CONTAINS(REGEXP_REPLACE(COALESCE(celular,''), r'\D',''), r'^55\d{10,11}$')
+        THEN CONCAT('+', REGEXP_REPLACE(COALESCE(celular,''), r'\D',''))
+      WHEN REGEXP_CONTAINS(REGEXP_REPLACE(COALESCE(celular,''), r'\D',''), r'^\d{10,11}$')
+        THEN CONCAT('+55', REGEXP_REPLACE(COALESCE(celular,''), r'\D',''))
+      ELSE NULL
+    END AS phone_e164,
+    TO_HEX(SHA256(LOWER(TRIM(COALESCE(email,'')))))                AS email_hash,
+    TO_HEX(SHA256(REGEXP_REPLACE(COALESCE(celular,''), r'\D',''))) AS phone_hash,
+    TO_HEX(SHA256(COALESCE(cpf,'')))                                AS cpf_hash,
+    NULLIF(INITCAP(LOWER(TRIM(dsmarca))), '') AS brand_name,
+    idmarca, dsmodalidade, periodocaptacao, uf, municipio,
+
+    COALESCE(
+      SAFE.PARSE_TIMESTAMP('%Y-%m-%dT%H:%M:%S', datainscricao),
+      SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', REPLACE(datainscricao,'T',' ')),
+      SAFE_CAST(datainscricao AS TIMESTAMP)
+    ) AS inscricao_ts,
+
+    CURRENT_TIMESTAMP() AS _ingestion_ts
+  FROM `single-healer-473019-e6.data_raw.tb_captacao_ingresso`
+  WHERE datainscricao IS NOT NULL
+)
+SELECT
+  business_key, complete_name, name_clean, first_name, last_name,
+  email_normalized, email_is_valid,
+  phone_raw, phone_digits, phone_e164,
+  email_hash, phone_hash, cpf_hash,
+  brand_name, idmarca, dsmodalidade, periodocaptacao, uf, municipio,
+  inscricao_ts,
+  DATE(inscricao_ts) AS inscricao_dt,
+  _ingestion_ts
+FROM src
+WHERE inscricao_ts IS NOT NULL
+  AND DATE(inscricao_ts) BETWEEN start_date AND run_date; 
