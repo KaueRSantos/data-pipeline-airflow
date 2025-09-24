@@ -41,16 +41,18 @@ O pipeline integra dados de diferentes fontes (**Postgres CRM, Google Analytics 
 
 ## Estrutura de Pastas
 
+```bash
+.
 ├── dags/
-│ ├── scr/
-│ │ ├── main.py # Código da Cloud Function
-│ │ └── requirements.txt # Dependências da função
-│ ├── dag_crm_to_bq.py # DAG para ingestão Postgres → BigQuery
-│ └── sql/
-│ ├── etl/ # Queries de transformação ETL
-│ └── delivery/ # Queries de views analíticas
+│   ├── scr/
+│   │   ├── main.py              # Código da Cloud Function
+│   │   └── requirements.txt     # Dependências da função
+│   ├── dag_crm_to_bq.py         # DAG para ingestão Postgres → BigQuery
+│   └── sql/
+│       ├── etl/                 # Queries de transformação ETL
+│       └── delivery/            # Queries de views analíticas
 ├── .github/
-│ └── workflows/
-│ ├── deploy.yml # CI/CD para Cloud Function
-│ └── sync-dags.yml # CI/CD para DAGs do Composer
+│   └── workflows/
+│       ├── deploy.yml           # CI/CD para Cloud Function
+│       └── sync-dags.yml        # CI/CD para DAGs do Composer
 ├── README.md
