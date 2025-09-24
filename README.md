@@ -3,7 +3,6 @@
 ## Visão Geral
 Este projeto implementa um **pipeline de dados moderno** utilizando **Google Cloud Platform (GCP)**, com foco em ingestão, transformação e disponibilização de dados para análises de negócio.  
 
-<img width="5116" height="4500" alt="image" src="https://github.com/user-attachments/assets/341f0e5d-50f6-44fe-8f3a-8a57b48d8a5e" />
 
 
 O pipeline integra dados de diferentes fontes (**Postgres CRM, Google Analytics 4, etc.**) e os disponibiliza de forma tratada e padronizada no **BigQuery**, seguindo as camadas:  
