@@ -1,3 +1,4 @@
+CREATE OR REPLACE VIEW `single-healer-473019-e6.data_delivery.VW_TIME_LEAD_TO_CONVERSION` AS 
 WITH
 params AS (
   SELECT
