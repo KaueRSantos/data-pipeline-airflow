@@ -1,6 +1,6 @@
 # data-pipeline-airflow
 
-## 📌 Visão Geral
+## Visão Geral
 Este projeto implementa um **pipeline de dados moderno** utilizando **Google Cloud Platform (GCP)**, com foco em ingestão, transformação e disponibilização de dados para análises de negócio.  
 
 O pipeline integra dados de diferentes fontes (**Postgres CRM, Google Analytics 4, etc.**) e os disponibiliza de forma tratada e padronizada no **BigQuery**, seguindo as camadas:  
@@ -10,7 +10,7 @@ O pipeline integra dados de diferentes fontes (**Postgres CRM, Google Analytics 
 
 ---
 
-## ⚙️ Principais Componentes
+## Principais Componentes
 
 - **Cloud Functions (Gen2)**  
   Extrai dados do Postgres (CRM) em *chunks* → grava Parquet no GCS → carrega no BigQuery.  
@@ -37,6 +37,18 @@ O pipeline integra dados de diferentes fontes (**Postgres CRM, Google Analytics 
 
 ---
 
-## 📂 Estrutura de Pastas
+## Estrutura de Pastas
 
-
+├── dags/
+│ ├── scr/
+│ │ ├── main.py # Código da Cloud Function
+│ │ └── requirements.txt # Dependências da função
+│ ├── dag_crm_to_bq.py # DAG para ingestão Postgres → BigQuery
+│ └── sql/
+│ ├── etl/ # Queries de transformação ETL
+│ └── delivery/ # Queries de views analíticas
+├── .github/
+│ └── workflows/
+│ ├── deploy.yml # CI/CD para Cloud Function
+│ └── sync-dags.yml # CI/CD para DAGs do Composer
+├── README.md
