@@ -1,0 +1,39 @@
+name: Deploy Cloud Function
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dags/scr/**'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Auth GCP
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        service_account: ${{ secrets.SA_EMAIL }}
+
+    - name: Set up gcloud
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Deploy Cloud Function
+      run: |
+        gcloud functions deploy etl-pipeline \
+          --gen2 \
+          --runtime python311 \
+          --region us-central1 \
+          --source . \
+          --entry-point run_pipeline \
+          --trigger-http \
+          --service-account ${{ secrets.SA_EMAIL }} \
+          --set-env-vars POSTGRES_HOST=${{ secrets.POSTGRES_HOST }},POSTGRES_PORT=${{ secrets.POSTGRES_PORT }},POSTGRES_DB=${{ secrets.POSTGRES_DB }},POSTGRES_USER=${{ secrets.POSTGRES_USER }},POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }},GCP_PROJECT=${{ secrets.GCP_PROJECT }},GCP_BUCKET=${{ secrets.GCP_BUCKET }},GCP_DEST_PATH=${{ secrets.GCP_DEST_PATH }},RAW_LEADS_DATASET=${{ secrets.RAW_LEADS_DATASET }},RAW_LEADS_TABLE=${{ secrets.RAW_LEADS_TABLE }},BQ_LOCATION=${{ secrets.BQ_LOCATION }},PG_QUERY="${{ secrets.PG_QUERY }}"
