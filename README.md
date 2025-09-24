@@ -53,6 +53,5 @@ O pipeline integra dados de diferentes fontes (**Postgres CRM, Google Analytics 
 │       └── delivery/            # Queries de views analíticas
 ├── .github/
 │   └── workflows/
-│       ├── deploy.yml           # CI/CD para Cloud Function
-│       └── sync-dags.yml        # CI/CD para DAGs do Composer
+│       ├── deploy.yml           # CI/CD para Cloud Function│      
 ├── README.md
